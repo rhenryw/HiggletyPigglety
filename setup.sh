@@ -2,30 +2,32 @@
 
 set -e
 
-# Function to detect if a command exists
-has() {
-  command -v "$1" >/dev/null 2>&1
-}
+has() { command -v "$1" >/dev/null 2>&1; }
 
 echo "[*] Checking environment..."
 
-# Try to install sudo if missing (only works if user has root access)
+# Install sudo if missing
 if ! has sudo; then
-  echo "[!] 'sudo' not found. Trying to install it..."
+  echo "[!] 'sudo' not found. Attempting to install..."
   if has apt; then
     su -c "apt update && apt install -y sudo"
   else
-    echo "[ERROR] 'sudo' is required and could not be installed automatically."
+    echo "[ERROR] Could not install sudo."
     exit 1
   fi
 fi
 
-# Ensure basic tools are installed
-echo "[*] Installing git, python3, and pip3 if needed..."
+# Install Python and required packages using apt
+echo "[*] Installing git, python3, and required python3 modules..."
 sudo apt update
-sudo apt install -y git python3 python3-pip
+sudo apt install -y git python3 \
+  python3-colorama \
+  python3-tabulate \
+  python3-requests \
+  python3-art \
+  python3-pyfiglet
 
-# Clone the repo if not already cloned
+# Clone the repo
 REPO_NAME="HiggletyPigglety"
 if [ ! -d "$REPO_NAME" ]; then
   git clone https://github.com/rhenryw/HiggletyPigglety.git
@@ -35,11 +37,6 @@ cd "$REPO_NAME" || {
   echo "[ERROR] Could not enter repo directory."
   exit 1
 }
-
-# Upgrade pip and install required Python packages
-echo "[*] Installing required Python packages..."
-pip3 install --upgrade pip
-pip3 install colorama tabulate animation art requests
 
 # Run the script
 echo "[*] Running D_DosAttack.py..."
